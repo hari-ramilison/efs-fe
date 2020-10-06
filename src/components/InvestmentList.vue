@@ -44,7 +44,7 @@
               :items="investments"
               class="elevation-1"
               style="max-height: 300px; overflow-y: auto"
-              v-if="isMobile"
+              v-if="!isMobile"
             >
                     <template v-slot:item="props">
                       <tr>
@@ -74,7 +74,7 @@
                     >
                       <v-card>
                         <v-card-title class="pb-0 pt-0 pl-0">
-                          <v-col cols="9" class="text-left body-2 text-truncate">{{ item.category }}</v-col>
+                          <v-col cols="9" class="text-left body-2 text-truncate">{{item.cust_number}} - {{item.category }}</v-col>
                           <v-col cols="3" class="text-center">
                             <v-card-actions>
                               <v-icon @click="updateInvestment(item)" class="small">mdi-pencil</v-icon>
@@ -149,7 +149,7 @@
     },
     methods: {
       onResize() {
-          if (window.innerWidth > 600)
+          if (window.innerWidth < 600)
             this.isMobile = true;
           else  
             this.isMobile = false;

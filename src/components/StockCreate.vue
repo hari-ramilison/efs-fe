@@ -9,7 +9,7 @@
                      :value="true"
                      type="error"
             >
-              Please verify Investment information.
+              Please verify Stock information.
             </v-alert>
           </v-col>
         </v-row>
@@ -25,59 +25,46 @@
                 <v-form ref="form" lazy-validation>
                   <v-container>
 
-                    <!--v-text-field
-                    v-model="investment.cust_number"
-                    label="Customer"
-                    required
-                    type="number"
-                    /-->
                     <v-select
-                    v-model="investment.customer"
+                    v-model="stock.customer"
                     label="Customer Number"
-                    :items="list"
+                    :items="customers"
                     item-value='pk'
                     item-text='cust_number'
                     ></v-select>
-
                     <v-text-field
-                    v-model="investment.category"
-                    label="Category"
+                    v-model="stock.symbol"
+                    label="Symbol"
                     required
                     />
                     <v-text-field
-                    v-model="investment.description"
-                    label="Description"
+                    v-model="stock.name"
+                    label="Name"
                     required
                     />
                     <v-text-field
-                    v-model="investment.acquired_value"
-                    label="Acquired Value"
-                    required
-                    type="number"
-                    />
-                    <v-text-field
-                    v-model="investment.acquired_date"
-                    label="Acquired_date"
-                    required
-                    type="date"
-
-                    />
-                    <v-text-field
-                    v-model="investment.recent_value"
-                    label="Recent Value"
+                    v-model="stock.shares"
+                    label="Shares"
                     required
                     type="number"
                     />
                     <v-text-field
-                    v-model="investment.recent_date"
-                    label="Recent Date"
+                    v-model="stock.purchase_price"
+                    label="Purchase Price"
+                    required
+                    type="number"
+
+                    />
+                    <v-text-field
+                    v-model="stock.purchase_date"
+                    label="Purchase Date"
                     required
                     type="date"
                     />
 
                 </v-container>
-                <v-btn v-if="!isUpdate" class="blue white--text" @click="createInvestment">Save</v-btn>
-                <v-btn v-if="isUpdate" class="blue white--text" @click="updateInvestment">Update</v-btn>
+                <v-btn v-if="!isUpdate" class="blue white--text" @click="createStock">Save</v-btn>
+                <v-btn v-if="isUpdate" class="blue white--text" @click="updateStock">Update</v-btn>
                 <v-btn class="white black--text" @click="cancelOperation">Cancel</v-btn>
                 </v-form>
               </v-card-text>
@@ -96,29 +83,36 @@
   const apiService = new APIService();
 
   export default {
-    name: 'InvestmentCreate',
+    name: 'StockCreate',
     components: {},
     data() {
       return {
         customers: [],
-        showError: false,
-        investment: {},
-        pageTitle: "Add New Investment",
+        showError: false,   
+        stock: {},
+        pageTitle: "Add New Stock",
         isUpdate: false,
         showMsg: '',
       };
     },
-    computed:{
-      list:{
-      get () {
-            return this.customers
-        },
-          set (newValue) {
-            this.customers = newValue
-          }
-      }
-    },
     methods: {
+      createStock() {
+        apiService.addNewStock(this.stock).then(response => {
+          if (response.status === 201) {
+            this.stock = response.data;
+             this.showMsg = "";
+            router.push('/stock-list/new');
+          }else{
+              this.showMsg = "error";
+          }
+        }).catch(error => {
+          if (error.response.status === 401) {
+            router.push("/auth");
+          }else if (error.response.status === 400) {
+            this.showMsg = "error";
+          }
+        });
+      },
       getCustomers() {
         apiService.getCustomerList().then(response => {
           this.customers = response.data.data;
@@ -135,31 +129,14 @@
           }
         });
       },
-      createInvestment() {
-        apiService.addNewInvestment(this.investment).then(response => {
-          if (response.status === 201) {
-            this.investment = response.data;
-             this.showMsg = "";
-            router.push('/investment-list/new');
-          }else{
-              this.showMsg = "error";
-          }
-        }).catch(error => {
-          if (error.response.status === 401) {
-            router.push("/auth");
-          }else if (error.response.status === 400) {
-            this.showMsg = "error";
-          }
-        });
-      },
       cancelOperation(){
-         router.push("/investment-list");
+         router.push("/stock-list");
       },
-      updateInvestment() {
-        apiService.updateInvestment(this.investment).then(response => {
+      updateStock() {
+        apiService.updateStock(this.stock).then(response => {
           if (response.status === 200) {
-            this.investment = response.data;
-            router.push('/investment-list/update');
+            this.stock = response.data;
+            router.push('/stock-list/update');
           }else{
               this.showMsg = "error";
           }
@@ -175,10 +152,10 @@
     mounted() {
       this.getCustomers();
       if (this.$route.params.pk) {
-        this.pageTitle = "Edit Investment";
+        this.pageTitle = "Edit Stock";
         this.isUpdate = true;
-        apiService.getInvestment(this.$route.params.pk).then(response => {
-          this.investment = response.data;
+        apiService.getStock(this.$route.params.pk).then(response => {
+          this.stock = response.data;
         }).catch(error => {
           if (error.response.status === 401) {
             router.push("/auth");

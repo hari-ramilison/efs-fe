@@ -19,19 +19,19 @@
                    :value="true"
                    type="success"
           >
-            New customer has been added.
+            New Stock has been added.
           </v-alert>
           <v-alert v-if="showMsg === 'update'" dismissible
                    :value="true"
                    type="success"
           >
-           Customer information has been updated.
+           Stock information has been updated.
           </v-alert>
           <v-alert v-if="showMsg === 'deleted'" dismissible
                    :value="true"
                    type="success"
           >
-            Selected Customer has been deleted.
+            Selected Stock has been deleted.
           </v-alert>
         </v-col>
       </v-row>
@@ -41,28 +41,26 @@
         <v-col cols="12" md="10" v-resize="onResize">
             <v-data-table
               :headers="headers"
-              :items="customers"
+              :items="stocks"
               class="elevation-1"
               style="max-height: 300px; overflow-y: auto"
-              v-if="!isMobile"
+              v-if="isMobile"
             >
                     <template v-slot:item="props">
                       <tr>
                         <td align="left">{{ props.item.cust_number }}</td>
-                        <td align="left">{{ props.item.name }}</td>
-                        <td nowrap="true" align="left">{{ props.item.address }}</td>
-                        <td nowrap="true" align="left">{{ props.item.city }}</td>
-                        <td nowrap="true" align="left">{{ props.item.state }}</td>
-                        <td nowrap="true" align="left">{{ props.item.zipcode }}</td>
-                        <td nowrap="true" align="left">{{ props.item.email }}</td>
-                        <td nowrap="true" align="left">{{ props.item.cell_phone }}</td>
-                        <td align="center"><v-icon @click="updateCustomer(props.item)">mdi-pencil</v-icon></td>
-                        <td align="center"><v-icon @click="deleteCustomer(props.item)">mdi-delete</v-icon></td>
+                        <td align="left">{{ props.item.symbol }}</td>
+                        <td nowrap="true" align="left">{{ props.item.name }}</td>
+                        <td nowrap="true" align="left">{{ props.item.shares }}</td>
+                        <td nowrap="true" align="left">{{ props.item.purchase_price }}</td>
+                        <td nowrap="true" align="left">{{ props.item.purchase_date }}</td>
+                        <td align="center"><v-icon @click="updateStock(props.item)">mdi-pencil</v-icon></td>
+                        <td align="center"><v-icon @click="deleteStock(props.item)">mdi-delete</v-icon></td>
                       </tr>  
                     </template>
               </v-data-table>
               <v-data-iterator 
-                :items="customers"
+                :items="stocks"
                 hide-default-footer
                 v-else
               >
@@ -75,11 +73,11 @@
                     >
                       <v-card>
                         <v-card-title class="pb-0 pt-0 pl-0">
-                          <v-col cols="9" class="text-left body-2 text-truncate">{{ item.name }}</v-col>
+                          <v-col cols="9" class="text-left body-2 text-truncate">{{item.cust_number}} - {{ item.name }}</v-col>
                           <v-col cols="3" class="text-center">
                             <v-card-actions>
-                              <v-icon @click="updateCustomer(item)" class="small">mdi-pencil</v-icon>
-                              <v-icon @click="deleteCustomer(item)" class="small">mdi-delete</v-icon>
+                              <v-icon @click="updateStock(item)" class="small">mdi-pencil</v-icon>
+                              <v-icon @click="deleteStock(item)" class="small">mdi-delete</v-icon>
                               <v-icon @click.native="expand(item, !isExpanded(item))" class="small">mdi-dots-horizontal</v-icon>
                             </v-card-actions>
                           </v-col>
@@ -88,20 +86,15 @@
 
                         <v-list v-show="isExpanded(item)" dense>
                           <v-list-item>
-                            <v-list-item-content>Address:</v-list-item-content>
-                            <v-list-item-content class="align-end">{{ item.address }}
-                                {{ item.city }}
-                                {{ item.state }}
-                                {{ item.zipcode }}
-                            </v-list-item-content>
+                            <v-list-item-content class="align-end">{{ item.symbol }}</v-list-item-content>
                           </v-list-item>
                           <v-list-item>
-                            <v-list-item-content>Email:</v-list-item-content>
-                            <v-list-item-content class="align-end">{{ item.email }}</v-list-item-content>
+                            <v-list-item-content>Category:</v-list-item-content>
+                            <v-list-item-content class="align-end">{{ item.shares }}</v-list-item-content>
                           </v-list-item>
                           <v-list-item>
-                            <v-list-item-content>Cell Phone:</v-list-item-content>
-                            <v-list-item-content class="align-end">{{ item.cell_phone }}</v-list-item-content>
+                            <v-list-item-content>Acquired Value:</v-list-item-content>
+                            <v-list-item-content class="align-end">{{ item.purchase_price }} on {{ item.purchase_date }}</v-list-item-content>
                           </v-list-item>
                         </v-list>
                       </v-card>
@@ -109,7 +102,7 @@
                   </v-row>
                 </template>     
               </v-data-iterator>  
-              <v-btn class="blue mt-4 white--text" @click="addNewCustomer">Add Customer</v-btn>  
+              <v-btn class="blue mt-4 white--text" @click="addNewStock">Add Stock</v-btn>  
         </v-col>  
       </v-row>
     </v-container>  
@@ -124,37 +117,36 @@
   const apiService = new APIService();
 
   export default {
-    name: "CustomerList",
+    name: "StockList",
     data: () => ({
-      customers: [],
+      stocks: [],
       validUserName: "Guest",
-      customerSize: 0,
+      stockSize: 0,
       showMsg: '',
       isMobile: false,
       headers: [
         {text: 'Customer Number', sortable: false, align: 'left',},
         {text: 'Name', sortable: false, align: 'left',},
-        {text: 'Address', sortable: false, align: 'left',},
-        {text: 'City', sortable: false, align: 'left',},
-        {text: 'State', sortable: false, align: 'left',},
-        {text: 'ZipCode', sortable: false, align: 'left',},
-        {text: 'Email', sortable: false, align: 'left',},
-        {text: 'Phone', sortable: false, align: 'left',},
+        {text: 'Symbol', sortable: false, align: 'left',},
+        {text: 'Shares', sortable: false, align: 'left',},
+        {text: 'Purchase Price', sortable: false, align: 'left',},
+        {text: 'Purchase Date', sortable: false, align: 'left',},
         {text: 'Update', sortable: false, align: 'left',},
         {text: 'Delete', sortable: false, align: 'left',}
+
       ],
 
     }),
     mounted() {
-      this.getCustomers();
+      this.getStocks();
       this.showMessages();
     },
     methods: {
       onResize() {
           if (window.innerWidth > 600)
-            this.isMobile = false;
-          else  
             this.isMobile = true;
+          else  
+            this.isMobile = false;
         },
       showMessages(){
         console.log(this.$route.params.msg)
@@ -162,10 +154,10 @@
           this.showMsg = this.$route.params.msg;
         }
       },
-      getCustomers() {
-        apiService.getCustomerList().then(response => {
-          this.customers = response.data.data;
-          this.customerSize = this.customers.length;
+      getStocks() {
+        apiService.getStockList().then(response => {
+          this.stocks = response.data.data;
+          this.stockSize = this.stocks.length;
           if (localStorage.getItem("isAuthenticates")
             && JSON.parse(localStorage.getItem("isAuthenticates")) === true) {
             this.validUserName = JSON.parse(localStorage.getItem("log_user"));
@@ -179,22 +171,22 @@
           }
         });
       },
-      addNewCustomer() {
+      addNewStock() {
         if (localStorage.getItem("isAuthenticates")
           && JSON.parse(localStorage.getItem("isAuthenticates")) === true) {
-          router.push('/customer-create');
+          router.push('/stock-create');
         } else {
           router.push("/auth");
         }
       },
-      updateCustomer(customer) {
-        router.push('/customer-create/' + customer.pk);
+      updateStock(stock) {
+        router.push('/stock-create/' + stock.pk);
       },
-      deleteCustomer(customer) {
-        apiService.deleteCustomer(customer.pk).then(response => {
+      deleteStock(stock) {
+        apiService.deleteStock(stock.pk).then(response => {
           if (response.status === 204) {
-            router.push('/customer-list/deleted/')
-            this.getCustomers()
+            router.push('/stock-list/deleted/')
+            this.getStocks()
           }
         }).catch(error => {
           if (error.response.status === 401) {

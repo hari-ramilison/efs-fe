@@ -36,6 +36,11 @@
                     <v-img
                       :src="require('@/assets/images/customer.jpg')" height="200px">
                     </v-img>
+                    <v-card-text>
+                      <div class="blue--text text-h6">
+                        Customers
+                      </div>  
+                    </v-card-text>
                     <v-card-actions>
                       <v-btn flat color="orange" @click="viewCustomers">View Details</v-btn>
                     </v-card-actions>
@@ -46,6 +51,11 @@
                      <v-img
                       :src="require('@/assets/images/nonstock.jpg')" height="200px">
                     </v-img>
+                    <v-card-text>
+                      <div class="blue--text text-h6">
+                        Investments
+                      </div>  
+                    </v-card-text>
                     <v-card-actions>
                       <v-btn flat color="orange" @click="viewInvestments">View Details</v-btn>
                     </v-card-actions>
@@ -56,7 +66,11 @@
                     <v-img
                       :src="require('@/assets/images/stocks.jpg')" height="200px">
                     </v-img>
-
+                    <v-card-text>
+                      <div class="blue--text text-h6">
+                        Stocks
+                      </div>  
+                    </v-card-text>
                     <v-card-actions>
                       <v-btn flat color="orange" @click="viewStocks">View Details</v-btn>
                     </v-card-actions>
@@ -85,6 +99,12 @@
     methods: {
       viewCustomers() {
         router.push('/customer-list');
+      },
+      viewInvestments() {
+        router.push('/investment-list');
+      },
+      viewStocks() {
+        router.push('/stock-list');
       },
       getUser() {
         if (localStorage.getItem("isAuthenticates")
